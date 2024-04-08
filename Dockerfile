@@ -1,12 +1,12 @@
-FROM node:16.15.0-alpine3.15
+FROM node:20-bullseye-slim
 
-RUN apk add --no-cache openjdk8-jre
-RUN apk add --no-cache bash
+RUN apt update -y && apt install -y openjdk-11-jdk bash
 
-RUN npm install -g firebase-tools@10.9.2
+RUN npm install -g firebase-tools
 
-COPY run.sh .
-COPY firebase.json .
-COPY .firebaserc .
+COPY . .
 
-ENTRYPOINT ["./run.sh"]
+RUN echo '#!/bin/sh \n firebase emulators:start' > ./entrypoint.sh && \
+    chmod +x ./entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
