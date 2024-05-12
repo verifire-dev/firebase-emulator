@@ -1,12 +1,17 @@
-FROM node:20-bullseye-slim
+FROM node:22-bullseye-slim
 
-RUN apt update -y && apt install -y openjdk-11-jdk bash
+WORKDIR /app
+COPY . /app
 
+RUN apt-get update -y && \
+    apt-get install -y openjdk-17-jdk bash && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 RUN npm install -g firebase-tools
 
-COPY . .
+RUN npm --prefix /app/functions ci
 
-RUN echo '#!/bin/sh \n firebase emulators:start' > ./entrypoint.sh && \
-    chmod +x ./entrypoint.sh
+RUN echo '#!/bin/sh \n firebase emulators:start' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]
