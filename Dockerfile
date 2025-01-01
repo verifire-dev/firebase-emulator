@@ -1,5 +1,4 @@
-# Stage 1: Build stage
-FROM node:22-bullseye-slim AS build
+FROM node:22-bullseye-slim
 
 WORKDIR /app
 COPY . /app
@@ -12,16 +11,9 @@ RUN apt-get update -y && \
     npm install -g firebase-tools && \
     npm --prefix /app/functions ci
 
-# Stage 2: Final stage
-FROM node:22-bullseye-slim
-
-WORKDIR /app
-
-# Copy only the necessary files from the build stage
-COPY --from=build /app /app
-
 # Ensure the entrypoint script is in place and executable
-RUN echo '#!/bin/sh \n firebase emulators:start' > /app/entrypoint.sh && \
+RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
+    echo 'firebase emulators:start' >> /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]
